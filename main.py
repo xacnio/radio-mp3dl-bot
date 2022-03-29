@@ -7,10 +7,12 @@ from yt_dlp import YoutubeDL
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
 import time
+import re
 
 RADIO_URL = "http://.../;stream.mp3" # ONLINE RADIO URL
 USER_AGENT = 'VLC/3.0.4 LibVLC/3.0.4'
 LOOP_TIME = 60
+M3U8_MODE = False # Some radio stations broadcasting on m3u8 format, just try this: True
 
 def record_radio():
     print("Radio record...")
@@ -21,18 +23,41 @@ def record_radio():
 
     headers = {'User-Agent': USER_AGENT}
     url = RADIO_URL
-    r = requests.get(url, headers=headers, stream=True)
+    if M3U8_MODE is True:
+        main = "/".join(RADIO_URL.split("/")[0:-1]) + "/"
+        r = requests.get(url, headers=headers)
+        parts = re.findall('\n#EXTINF:([0-9.]*),\n(.*)', r.text)
+        if len(parts) > 0:
+            total = 0
+            with open('audio.temp', 'wb') as f:
+                try:
+                    for part in parts:
+                        duration = float(part[0])
+                        name = part[1]
+                        r2 = requests.get(main + name, headers=headers, stream=True)
+                        for block in r2.iter_content(1024):
+                            f.write(block)
+                            total += len(block)
+                            if total > 1024 * 256:
+                                break
+                except:
+                    pass
 
-    total = 0
-    with open('audio.temp', 'wb') as f:
-        try:
-            for block in r.iter_content(1024):
-                f.write(block)
-                total += len(block)
-                if total > 1024 * 256:
-                    break
-        except KeyboardInterrupt:
-            pass
+        
+    else:
+        r = requests.get(url, headers=headers, stream=True)
+        
+        total = 0
+        with open('audio.temp', 'wb') as f:
+            try:
+                for block in r.iter_content(1024):
+                    f.write(block)
+                    total += len(block)
+                    if total > 1024 * 256:
+                        break
+            except:
+                pass
+
 
     if os.path.exists("audio.temp") and total > 0:
         os.system("ffmpeg -y -nostats -loglevel 0 -i audio.temp -f mp3 -vn -sn -dn -ignore_unknown audio.mp3")
