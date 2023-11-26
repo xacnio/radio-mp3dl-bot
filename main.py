@@ -8,13 +8,18 @@ from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
 import time
 import re
+import sys
 
-RADIO_URL = "http://.../;stream.mp3" # ONLINE RADIO URL
-USER_AGENT = 'VLC/3.0.4 LibVLC/3.0.4'
+RADIO_URL = "" if len(sys.argv) < 2 else sys.argv[1] # ONLINE RADIO URL
+USER_AGENT = 'VLC/3.0.20 LibVLC/3.0.20'
 LOOP_TIME = 60
 M3U8_MODE = False # Some radio stations broadcasting on m3u8 format, just try this: True
 
 def record_radio():
+    if not RADIO_URL.startswith("http://") and not RADIO_URL.startswith("https://"):
+        print('USAGE: python main.py <radio-stream-url>')
+        exit()
+
     print("Radio record...")
     if os.path.exists("audio.mp3"):
         os.remove("audio.mp3")
@@ -93,7 +98,7 @@ def detect_and_download():
     
     if not 'track' in sarki:
         return print('Shazam found no results!')
-    filename = f'musics/{sarki["track"]["title"]} - {sarki["track"]["subtitle"]}.mp3'
+    filename = f'musics/{sarki["track"]["title"]} - {sarki["track"]["subtitle"]}'
     
     if os.path.exists(filename):
         print(f'Song found: {sarki["track"]["title"]} - {sarki["track"]["subtitle"]}. Already downloaded!')
@@ -124,6 +129,7 @@ def detect_and_download():
                     with YoutubeDL(opts) as rip:
                         rip_data = rip.extract_info(url)
                         print("Download finished!")
+                        filename += ".mp3"
 
                         track = sarki["track"]
 
@@ -143,7 +149,7 @@ def detect_and_download():
                             audio.add(APIC(3, 'image/jpeg', 3, 'Front cover', r.content))
                             audio.save(v2_version=3)
                 except Exception as e:
-                    print(f"{str(type(e)): {str(e)}}")
+                    print(str(type(e)) + ": " + str(e))
                 
                 return
 

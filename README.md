@@ -1,14 +1,15 @@
 # radio-mp3dl-bot
-Radio - mp3 downloader bot (experimental). It is recording internet radio audio periodically, sending to Shazam the record and if its find the song, downloading the mp3 from Youtube (yt-dlp) and adding id3 tags and album artwork.
+An MP3 downloader bot by listening to radio streams. It periodically records audio from internet radio, sends the recording to Shazam, and if the song is identified, downloads the MP3 from YouTube using yt-dlp. It also adds ID3 tags and album artwork.
 
 # Run
 ``` 
-python3 main.py
+pip3 install -r requirements.txt
+python3 main.py <radio-stream-url>
 ```
 
-# Preview
+# Example
 ``` 
-➜ python3 main.py
+➜ python3 main.py https://example.com/listen.pls
 Radio record...
 Create signature from the audio record...
 Push to Shazam...
@@ -21,4 +22,6 @@ Song found: Tik Tok - Ke$ha. Downloading...
 Song found: Tik Tok - Ke$ha. Already downloaded!
 ...............
 Song found: Sahara - Hensonn. Downloading...
+Download finished!
+...............
 ```

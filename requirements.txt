@@ -1,3 +1,4 @@
 mutagen
 yt_dlp
 pydub
+pytz
