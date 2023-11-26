@@ -100,7 +100,7 @@ def detect_and_download():
         return print('Shazam found no results!')
     filename = f'musics/{sarki["track"]["title"]} - {sarki["track"]["subtitle"]}'
     
-    if os.path.exists(filename):
+    if os.path.exists(filename+".mp3"):
         print(f'Song found: {sarki["track"]["title"]} - {sarki["track"]["subtitle"]}. Already downloaded!')
         return
 
